@@ -2,42 +2,42 @@
 Import setninger for aa kunne bruke bibliotektet
 til OLED skjermen
 */
-#include <SD.h>         // for sd kort
-#include <SPI.h>        // for sd kort
-#include <AudioZero.h>  // for lyd
+#include <SD.h>         // For sd kort
+#include <SPI.h>        // For sd kort
+#include <AudioZero.h>  // For lyd
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
-#include <TimeLib.h>  //for tid
+#include <TimeLib.h>  // For tid
 
-//Skjermen vaar er 128x32
+// Skjermen vaar er 128x32
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 32
 
-//definerer et skjerm objekt som heter display
+// Definerer et skjerm objekt som heter display
 #define OLED_RESET -1  //reset pin
 #define SCREEN_ADDRESS 0x3C
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
-//knappene til tangene:
+// Knappene til tangene:
 const int vTan = 2;  //venstre
 const int mTan = 3;  //midten
 const int hTan = 4;  //hoyre
 
-//Avslutt knapp
+// Avslutt knapp
 const int avslutt = 5;
 
-//variabler for om knappene er "aktive"
+// Variabler for om knappene er "aktive"
 bool vA = false;
 bool mA = false;
 bool hA = false;
 
-//volum meteret og volum:
+// Volum meteret og volum:
 const int vMeter = 21;
 int volum = 0;
 
 
-//navn paa sangene i sd-kortet lagret paa hver sin sjanger liste:
+// Navn paa sangene i sd-kortet lagret paa hver sin sjanger liste:
 char *jazzTekst[] = { "Harry James & His Orchestra - It's Been A Long, Long Time",
                       "David Grant & Jaki Graham - Could It Be I'm Falling In Love",
                       "Louis Armstrong - What A Wonderful World" };
@@ -50,34 +50,34 @@ char *discoverTekst[] = { "Drake - Passionfruit",
                           "PinkPantheress & Ice Spice - Boy's a liar Pt. 2",
                           "Taylor Swift - Karma" };
 
-//navn paa filene
+// Navn paa filene
 char *jazzFil[] = { "J1.wav", "J2.wav", "J3.wav" };
 char *klassiskFil[] = { "K1.wav", "K2.wav", "K3.wav" };
 char *discoverFil[] = { "D1.wav", "D2.wav", "D3.wav" };
 
-//antall jazz sanger
+// Antall jazz sanger
 const int antJazz = 3;
 const int antKlassisk = 3;
 const int antDiscover = 3;
 
-//rekkefolgen foer den blir gjort tilfeldig
+// Rekkefolgen foer den blir gjort tilfeldig
 int rekkefolgeJazz[] = { 0, 1, 2 };
 int rekkefolgeKlassisk[] = { 0, 1, 2 };
 int rekkefolgeDiscover[] = { 0, 1, 2 };
 
-//teller for aa holde styr paa hvor langt inn i listen den er
+// Teller for aa holde styr paa hvor langt inn i listen den er
 int tellerJazz = 0;
 int tellerKlassisk = 0;
 int tellerDiscover = 0;
 
-//variabel som holder styr paa hvilken dag det er
+// Variabel som holder styr paa hvilken dag det er
 int dag = weekday();
 
 void setup() {
   Serial.begin(9600);
-  while (!Serial) { ; }  //venter til serial har startet
+  while (!Serial) { ; }  // Venter til serial har startet
 
-  //knappene har input pullup for aa ungaa unoeyaktige inputs
+  // Knappene har input pullup for aa ungaa unoeyaktige inputs
   pinMode(vTan, INPUT_PULLUP);
   pinMode(mTan, INPUT_PULLUP);
   pinMode(hTan, INPUT_PULLUP);
@@ -111,7 +111,7 @@ void setup() {
   TID PAA DAGEN SETUP
   */
   setTime(11, 32, 0, 24, 5, 2023);
-  //Maa sette det opp manuelt pga mangel paa arduino komponenter ||||||||||<<<<<<<<<<< VIKTIG <<<<<<<<<<<||||||||||
+  // Maa sette det opp manuelt pga mangel paa arduino komponenter ||||||||||<<<<<<<<<<< VIKTIG <<<<<<<<<<<||||||||||
 
 
   /*
@@ -119,7 +119,7 @@ void setup() {
   */
   Serial.println("Initialiserer SD kortet...");
 
-  if (!SD.begin(SDCARD_SS_PIN)) {  //finner det innebygde sd kortet (SDCARD_SS_PIN)
+  if (!SD.begin(SDCARD_SS_PIN)) {  // Finner det innebygde sd kortet (SDCARD_SS_PIN)
     Serial.println("Noe galt skjedde!");
     while (true)
       ;
@@ -127,17 +127,17 @@ void setup() {
 
   Serial.println("Suksessfull.");
 
-  // setter sample raten til 44100hz*2
-  //AudioZero.begin(2 * 44100);
+  // Setter sample raten til 44100hz*2
+  // AudioZero.begin(2 * 44100);
 
-  //shuffler listene en gang for aa faa en tilfeldig rekkefolge paa sangene
+  // Shuffler listene en gang for aa faa en tilfeldig rekkefolge paa sangene
   shuffle(rekkefolgeJazz, antJazz);
   shuffle(rekkefolgeKlassisk, antKlassisk);
   shuffle(rekkefolgeDiscover, antDiscover);
 }
 
 void loop() {
-  //naar det er en ny dag skal alt sammen forsyves med et hakk, hvis det skulle vaere slik at de haar naadd slutten av rekkefolgen saa lages det en ny en
+  // Naar det er en ny dag skal alt sammen forsyves med et hakk, hvis det skulle vaere slik at de haar naadd slutten av rekkefolgen saa lages det en ny en
   if (dag != weekday()) {
     dag = weekday();
     if (++tellerJazz == antJazz) {
@@ -154,19 +154,19 @@ void loop() {
     }
   }
 
-  //if sjekker for om knapper blir trykket ned
+  // If sjekker for om knapper blir trykket ned
   if (digitalRead(vTan) == LOW) {
     spill("C4.wav");
     delay(500);
     for (int i = 0; i < 2; i++) {
     	displayString("Spiller av: " + String(jazzTekst[rekkefolgeJazz[tellerJazz]]));
     }
-    spill(jazzFil[rekkefolgeJazz[tellerJazz]]);  //spiller av musikk fra den tilsvarende listen valgt av rekkefolgen
-    while (digitalRead(vTan) == LOW) { ; }  //venter helt til bruker har sluppet knappen
-    delay(500);                             //liten delay som passer paa at den ikke registrerer et andre trykk paa samme trykk
+    spill(jazzFil[rekkefolgeJazz[tellerJazz]]);  // Spiller av musikk fra den tilsvarende listen valgt av rekkefolgen
+    while (digitalRead(vTan) == LOW) { ; }  // Venter helt til bruker har sluppet knappen
+    delay(500);                             // Liten delay som passer paa at den ikke registrerer et andre trykk paa samme trykk
   }
   if (digitalRead(mTan) == LOW) {
-    spill("D4.wav");  //spiller av note D fjerde oktav for midterste piano tangent
+    spill("D4.wav");  // Spiller av note D fjerde oktav for midterste piano tangent
     delay(500);
     for (int i = 0; i < 2; i++) {
     	displayString("Spiller av: " + String(klassiskTekst[rekkefolgeKlassisk[tellerKlassisk]]));
@@ -186,21 +186,21 @@ void loop() {
     delay(500);
   }
 
-  volum = map(analogRead(21), 0, 1023, 0, 10);  //setter volumet til et tall mellom 0 til 10 ut ifra potentiometerets verdi
-  //AudioZero.setVolum(volum); //er en funksjon i AudioZero, men er ikke implementert av utviklerene. Mer info i rapport
+  volum = map(analogRead(21), 0, 1023, 0, 10);  // Setter volumet til et tall mellom 0 til 10 ut ifra potentiometerets verdi
+  // AudioZero.setVolum(volum); //er en funksjon i AudioZero, men er ikke implementert av utviklerene. Mer info i rapport
 }
 
-//shuffler en rekkefolge til den starter paa riktig maate, ikke starter med hva den forrige rekkefolgen sluttet med
+// Shuffler en rekkefolge til den starter paa riktig maate, ikke starter med hva den forrige rekkefolgen sluttet med
 void shuffleRiktig(int liste[], int lengde) {
-  //lager en helt ny liste som ikke har samme minne adresse som den andre listen
+  // Lager en helt ny liste som ikke har samme minne adresse som den andre listen
   int nyListe[lengde];
   for (int i = 0; i < lengde; i++) {
     nyListe[i] = liste[i];
   }
-  while (true) {  //shuffler helt til kriteriene er moett
+  while (true) {  // Shuffler helt til kriteriene er moett
     shuffle(nyListe, lengde);
-    if (nyListe[0] != liste[lengde - 1]) {  //sjekker om den nye listen ikke starter med hva den forrige sluttet med
-      for (int i = 0; i < lengde; i++) {    //bytter ut verdiene
+    if (nyListe[0] != liste[lengde - 1]) {  // Sjekker om den nye listen ikke starter med hva den forrige sluttet med
+      for (int i = 0; i < lengde; i++) {    // Bytter ut verdiene
         liste[i] = nyListe[i];
       }
       break;
@@ -208,7 +208,7 @@ void shuffleRiktig(int liste[], int lengde) {
   }
 }
 
-//endrer posisjonen paa elementene i listen tilfeldig
+// Endrer posisjonen paa elementene i listen tilfeldig
 void shuffle(int liste[], int lengde) {
   for (int i = 0; i < lengde; i++) {
     int pos = random(lengde);
@@ -218,7 +218,7 @@ void shuffle(int liste[], int lengde) {
   }
 }
 
-//sjekker om et element finnes i en liste med heltall
+// Sjekker om et element finnes i en liste med heltall
 bool harElement(int liste[], int element) {
   for (int i = 0; i < sizeof(liste); i++) {
     if (liste[i] == element) return true;
@@ -226,7 +226,7 @@ bool harElement(int liste[], int element) {
   return false;
 }
 
-//spill av fil funk:
+// Spill av fil funk:
 void spill(String filnavn) {
   AudioZero.begin(2 * 44100);  //starter aa lese
   File musikkFil = SD.open(filnavn);
@@ -236,7 +236,7 @@ void spill(String filnavn) {
   }
 
   if (filnavn.equals("C4.wav") || filnavn.equals("D4.wav") || filnavn.equals("E4.wav")) {
-    //skal ikke vise feedback lydene fra tangentene, kun sanger
+    // Skal ikke vise feedback lydene fra tangentene, kun sanger
     AudioZero.play(musikkFil);
   } else {
     AudioZero.play(musikkFil);
@@ -258,12 +258,12 @@ void displayString(String str) {
   /*
     Beregner lengden paa teksten som skal vises i piksler
   */
-  int strLength = str.length() * 6 * 3;  // hver karakter er  6 pixels bred. * 3  fordi tekst stoerrelse er sat til 3
-  int pos = SCREEN_WIDTH;                // start posisjon er utenfor skjermen paa hoyere side
+  int strLength = str.length() * 6 * 3;  // Hver karakter er  6 pixels bred. * 3  fordi tekst stoerrelse er sat til 3
+  int pos = SCREEN_WIDTH;                // Start posisjon er utenfor skjermen paa hoyere side
 
-  //skrolle loop
+  // Skrolle loop
   /*
-    kjoerer saa lenge pos er stoerre enn 
+    Kjoerer saa lenge pos er stoerre enn 
     negativ lengde av tekst
   */
   while (pos > -strLength) {
@@ -271,7 +271,7 @@ void displayString(String str) {
     display.setCursor(pos, 0);
     display.println(str);
     display.display();
-    //delay(1); // farten for skrolling
+    // delay(1); // farten for skrolling
     pos--;
   }
 
